@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Rutas y circuitos siguiendo carreteras (Leaflet + OSRM)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+  <style>
+    html, body, #map { height: 100%; margin: 0; }
+    #menu {
+      position:absolute; top:10px; left:10px; z-index:1000;
+      background:#fff; padding:10px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.15);
+      width:280px; max-width:90vw;
+    }
+    #menu h3 { margin: 0 0 8px; font-size:16px; }
+    #btns { display:flex; flex-direction:column; gap:6px; }
+    #btns button { width:100%; padding:8px; border:1px solid #e5e7eb; border-radius:6px; background:#f8fafc; cursor:pointer; }
+    #btns button:hover { background:#eef2ff; }
+    #utils { margin-top:8px; display:flex; gap:6px; }
+    #utils button { flex:1; padding:8px; border:1px solid #e5e7eb; border-radius:6px; background:#fafafa; cursor:pointer; }
+    #utils button:hover { background:#f1f5f9; }
+    #stats { margin-top:8px; font-size:13px; color:#334155; }
+    .pill { display:inline-block; background:#f1f5f9; padding:2px 6px; border-radius:999px; margin-right:6px; }
+    small.muted { color:#64748b; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <div id="menu">
+    <h3>Rutas disponibles</h3>
+    <div id="btns"><!-- se llenan dinámicamente --></div>
+    <div id="utils">
+      <button id="clear">Limpiar</button>
+      <button id="fit">Ajustar vista</button>
+    </div>
+    <div id="stats"><small class="muted">Consejo: añade más rutas en <code>ROUTES</code>.</small></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script>
+    // === 1) Un solo mapa ===
+    const map = L.map('map').setView([19.5426, -96.9103], 14);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Capas de trabajo
+    const routesLayer = L.layerGroup().addTo(map);
+    const markersLayer = L.layerGroup().addTo(map);
+
+    // === 2) Define aquí tus rutas/circuitos (puntos aproximados) ===
+    // El motor OSRM calculará el trazado real por carreteras entre estos puntos.
+    // type: "line" (A→B) o "circuit" (cerrado volviendo al 1er punto)
+    // points: [ [lat, lng], ... ]
+    const ROUTES = [
+      {
+        id: 'Ruta 1',
+        label: 'Plaza Animas-Avenida Xalapa x Americas',
+        type: 'line',
+        color: '#2563eb',
+        points: [
+          [19.51564177733534, -96.87964341594438],  // A
+          [19.542461185124353, -96.92718338095398]   // B
+        ]
+      },
+
+      {
+        id: 'R2',
+        label: 'Arco Sur - Rebsamen - Sauces - Avila Camacho - Americas - Pipila - Lázaro Cárdenas - Arco Sur - Plaza Animas',
+        type: 'circuit',
+        color: '#dc2626',
+        points: [
+          [19.50769177740882, -96.88080453125596],
+          [19.515966048477335, -96.91152995601553],
+          [19.524652584562027, -96.91647639923467],
+          [19.525055677294624, -96.91932056822652],
+          [19.51921530204498, -96.91842999029427],
+          [19.521357622044306, -96.9241269532866],
+          [19.524677120475513, -96.93190115728305],
+          [19.53975642913451, -96.92692173385555],
+          [19.542094279093522, -96.90866398504731]
+        ]
+      },
+
+      {
+        id: 'R3',
+        label: 'Martires 28 de Agosto - Miguel Aleman',
+        type: 'line',
+        color: '#16a34a',
+        points: [
+          [ 19.54399426672097, -96.93786449099738],
+          [19.551416882840947, -96.91204699381684] 
+      ]
+
+
+      },
+      { 
+        id: 'R4',
+        label: 'Tecnica 72 - Calle Chiapas',
+        type: 'line',
+        color: '#16a34a',
+        points: [
+          [19.568853888639612, -96.92418859973648], 
+          [19.532655194077744, -96.94519617825766] 
+      ]
+
+      },
+      {
+        id: 'R5',
+        label: 'Circuito Precidentes - Rebsamen - Xalapa 2000 - Arco Sur - Trancas - Lazaro Cardenas - Ruiz Cortinez - Sauces - Velodromo',
+        type: 'circuit',
+        color: '#dc2626',
+        points: [
+          [19.512664058614753, -96.92143131220811],
+          [19.517581781971284, -96.91326778014738],
+          [19.512633693133274, -96.90403064211233],
+          [19.5123075745803, -96.90134709542035],
+          [19.508845983080796, -96.90046678955896],
+          [19.50792216749318, -96.90109108598443],
+          [19.505969735613295, -96.88931457708361],
+          [19.506202839653035, -96.87766002085613],
+          [19.508949015456373, -96.869331005883],
+          [19.51319364291143, -96.87525019549395],
+          [19.51866085245444, -96.88269399949301],
+          [19.523078794577437, -96.89495315101081],
+          [19.535503081133356, -96.9078147397299],
+          [19.539105829157567, -96.90770522594677],
+          [19.560150231704544, -96.92235519356504],
+          [19.56260701272572, -96.92990612450068],
+          [19.55922216151033, -96.93180259535171],
+          [19.5357510770896, -96.93587132423885],
+          [19.529052293430958, -96.93519823096221],
+          [19.52229829918367, -96.933694001258]
+        ]
+
+
+      },
+
+    ];
+
+    // === 3) Utilidades de UI ===
+    const $stats = document.getElementById('stats');
+    function setStats(html) { $stats.innerHTML = html; }
+    function fmtKm(m) { return (m/1000).toFixed(2) + ' km'; }
+    function fmtMin(s) { return Math.round(s/60) + ' min'; }
+
+    // === 4) Dibujar ruta "encajada" a carreteras con OSRM ===
+    // Acepta >=2 puntos. Si es circuito, cierra con el primero.
+    async function drawRouted(pointsLatLng, isCircuit=false, color='#3388ff') {
+      routesLayer.clearLayers();
+      markersLayer.clearLayers();
+
+      if (!pointsLatLng || pointsLatLng.length < 2) {
+        setStats('<span class="pill">⚠️</span> Se necesitan al menos 2 puntos.');
+        return;
+      }
+
+      // Cerrar circuito si aplica
+      let pts = pointsLatLng.slice();
+      if (isCircuit) pts.push(pointsLatLng[0]);
+
+      // Leaflet usa [lat,lng], OSRM en URL usa lon,lat
+      const coordsParam = pts.map(([lat,lng]) => `${lng},${lat}`).join(';');
+      const url = `https://router.project-osrm.org/route/v1/driving/${coordsParam}?overview=full&geometries=geojson`;
+
+      setStats('Calculando ruta por carretera…');
+      let data;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('OSRM no disponible');
+        data = await res.json();
+      } catch (e) {
+        setStats('<span class="pill">❌</span> No se pudo calcular la ruta (OSRM).');
+        return;
+      }
+
+      if (!data.routes || !data.routes.length) {
+        setStats('<span class="pill">⚠️</span> No se encontró ruta.');
+        return;
+      }
+
+      const route = data.routes[0]; // mejor ruta
+      const gj = { type:'Feature', geometry: route.geometry, properties:{} };
+
+      // Dibuja línea y marcadores de inicio/fin
+      const line = L.geoJSON(gj, { style:{ color, weight:5, opacity:.9 } }).addTo(routesLayer);
+      L.marker(pts[0].slice().reverse().slice().reverse() && pointsLatLng[0]).addTo(markersLayer).bindPopup('Inicio');
+      L.marker(pts[pts.length-1].slice().reverse().slice().reverse() && pointsLatLng[isCircuit ? 0 : pointsLatLng.length-1])
+        .addTo(markersLayer)
+        .bindPopup(isCircuit ? 'Cierre' : 'Fin');
+
+      map.fitBounds(line.getBounds(), { padding:[20,20] });
+
+      // Resumen distancia/tiempo
+      setStats(
+        `<span class="pill">Distancia: ${fmtKm(route.distance)}</span>` +
+        `<span class="pill">Duración: ${fmtMin(route.duration)}</span>` +
+        (isCircuit ? ` <span class="pill">Circuito</span>` : '')
+      );
+    }
+
+    // === 5) Crear botones según ROUTES ===
+    const btns = document.getElementById('btns');
+    ROUTES.forEach(route => {
+      const b = document.createElement('button');
+      b.id = route.id;
+      b.textContent = route.label;
+      b.addEventListener('click', () => {
+        const isCircuit = route.type === 'circuit';
+        drawRouted(route.points, isCircuit, route.color);
+      });
+      btns.appendChild(b);
+    });
+
+    // === 6) Utilidades Limpiar/Ajustar ===
+    document.getElementById('clear').addEventListener('click', () => {
+      routesLayer.clearLayers();
+      markersLayer.clearLayers();
+      setStats('<small class="muted">Limpio. Elige una ruta.</small>');
+    });
+
+    document.getElementById('fit').addEventListener('click', () => {
+      const bounds = routesLayer.getBounds?.();
+      if (bounds && bounds.isValid && bounds.isValid()) {
+        map.fitBounds(bounds, { padding:[20,20] });
+      } else {
+        map.setView([19.5426, -96.9103], 14);
+      }
+    });
+  </script>
+</body>
+</html>
+
