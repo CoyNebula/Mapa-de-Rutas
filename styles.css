@@ -90,9 +90,11 @@ html, body, #map { height: 100%; margin: 0; }
   font-size: 16px;
   text-align: center;
  }
-#btns { display:flex;
+#btns {
+  display:flex;
   flex-direction:column; 
-  gap:6px; }
+  gap:6px; 
+}
 
 #btns button { 
   width:100%; 
