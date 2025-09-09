@@ -140,12 +140,24 @@ const ROUTES = [
       [19.602536473877706, -96.95834930904101],
       [19.626304005021606, -96.87246637011164] 
   ]
-  
-
-
   },
 
 ];
+
+// === MENU HAMBURGUESA ===
+document.addEventListener("DOMContentLoaded", function() {
+  const menu = document.getElementById("toggle-menu");
+  menu.addEventListener("click", () => {
+    const enlaces = document.getElementById("menu");
+    if (enlaces.hasAttribute("hidden")) {
+      enlaces.removeAttribute("hidden");
+      menu.setAttribute("aria-expanded", "true");
+    } else {
+      enlaces.setAttribute("hidden", "");
+      menu.setAttribute("aria-expanded", "false");
+    }
+  });
+});
 
 // === FILTRO DE RUTAS Y PARADAS ===
 const searchInput = document.getElementById('search-stop');
@@ -269,7 +281,6 @@ async function drawRouted(pointsLatLng, isCircuit=false, color='#3388ff') {
   }
 }
 
-// === 5) Crear botones según ROUTES ===
 
 // === 6) Utilidades Limpiar/Ajustar ===
 document.getElementById('clear').addEventListener('click', () => {

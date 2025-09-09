@@ -10,17 +10,40 @@
 <body>
   <div id="map"></div>
 
-  <div style="overflow: auto;" id="menu">
-    <h3>Rutas disponibles</h3>
-    <input type="text" id="search-stop" placeholder="Buscar ruta" style="width:100%;margin-bottom:10px;">
-    <div id="btns"><!-- se llenan dinámicamente --></div>
-    <div id="utils">
-      <button id="clear">Limpiar</button>
-      <button id="fit">Ajustar vista</button>
-    </div>
-    <div id="stats"><small class="muted">Consejo: añade más rutas en <code>ROUTES</code>.</small></div>
-  </div>
+ <div id="menu-display">
+  <input type="checkbox" id="toggle-menu" checked style="display:none;">
+  <label for="toggle-menu" class="hamburger" >
+    <span></span>
+    <span></span>
+    <span></span>
 
+  </label>
+</div>
+
+<div id="menu" hidden>
+  <div class="menu-columns">
+    <!-- Columna izquierda -->
+    <div class="menu-left">
+      <h3>Buscar y filtrar</h3>
+      <input type="text" id="search-stop" placeholder="Buscar ruta" class="search-stop">
+      <div id="filters">
+        <label><input type="checkbox" id="circuitos"> Circuitos</label>
+        <label><input type="checkbox" id="lineas"> Líneas</label>
+      </div>
+    </div>
+    <!-- Columna derecha:-->
+    <div class="menu-right">
+      <h3>Rutas disponibles</h3>
+      <div id="btns"></div>
+      <div id="stats" style="margin-top:16px;"></div>
+      <div id="details" style="margin-top:16px;"></div>
+      <div id="utils" style="margin-top:16px;">
+        <button id="clear">Limpiar</button>
+        <button id="fit">Ajustar vista</button>
+      </div>
+    </div>
+  </div>
+</div>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
   <script src="mapa.js">  </script>
 </body>
