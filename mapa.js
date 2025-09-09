@@ -31,6 +31,9 @@ const ROUTES = [
       {coordenas: [19.529812234797678, -96.9004640888919], nombre: 'Agua Santa' },
       {coordenas: [19.53900134668526, -96.91817967831048], nombre: 'AV Americas'},
       {coordenas: [19.542572540214795, -96.92722192111118], nombre: 'AV Xalapa' }
+    ],
+    images:[
+      './Img_Camiones/Bus_1.jpg',
     ]
   },
 
@@ -69,8 +72,10 @@ const ROUTES = [
       {coordenas: [19.507456519474925, -96.89952835543674], nombre: 'Arco Sur'},
       {coordenas: [19.50540441976, -96.89361099201855], nombre: 'Arco Sur - Yanga'},
       {coordenas: [19.50769177740882, -96.88080453125596], nombre: 'Walmart Arco Sur' }
-    ]
-     
+    ],
+    images:[
+      './Img_Camiones/Bus_2.jpeg',
+    ] 
   },
   
   {
@@ -145,6 +150,8 @@ const ROUTES = [
 ];
 
 // === MENU HAMBURGUESA ===
+
+// Menu 1
 document.addEventListener("DOMContentLoaded", function() {
   const menu = document.getElementById("toggle-menu");
   menu.addEventListener("click", () => {
@@ -158,6 +165,22 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 });
+
+// Menu 2
+document.addEventListener("DOMContentLoaded", function() {
+  const menu = document.getElementById("toggle-menu");
+  menu.addEventListener("click", () => {
+    const enlaces = document.getElementById("menu2");
+    if (enlaces.hasAttribute("hidden")) {
+      enlaces.removeAttribute("hidden");
+      menu.setAttribute("aria-expanded", "true");
+    } else {
+      enlaces.setAttribute("hidden", "");
+      menu.setAttribute("aria-expanded", "false");
+    }
+  });
+});
+
 
 // === FILTRO DE RUTAS Y PARADAS ===
 const searchInput = document.getElementById('search-stop');
@@ -175,6 +198,16 @@ function renderRouteButtons(filter = '') {
         routeSelected = route;
         if (searchInput) searchInput.value = '';
         drawRouted(route.points, isCircuit, route.color);
+
+        // Mostrar imágenes en menu2
+        const detailsDiv = document.getElementById('details');
+        if (route.images && route.images.length) {
+          detailsDiv.innerHTML = route.images.map(src => 
+            `<img src="${src}" class="img-camion">`
+          ).join('');
+        } else {
+          detailsDiv.innerHTML = '<small>No hay imágenes disponibles.</small>';
+        }
       });
       btns.appendChild(b);
     }

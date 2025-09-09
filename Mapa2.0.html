@@ -20,6 +20,12 @@
   </label>
 </div>
 
+  <div id="inicioSesion">
+    <button id="loginButton">Iniciar Sesión</button>
+    <button id="logoutButton" style="display:none;">Cerrar Sesión</button>
+    <span id="userEmail" style="margin-left:10px;"></span>
+  </div>
+
 <div id="menu" hidden>
   <div class="menu-columns">
     <!-- Columna izquierda -->
@@ -35,15 +41,24 @@
     <div class="menu-right">
       <h3>Rutas disponibles</h3>
       <div id="btns"></div>
-      <div id="stats" style="margin-top:16px;"></div>
-      <div id="details" style="margin-top:16px;"></div>
-      <div id="utils" style="margin-top:16px;">
         <button id="clear">Limpiar</button>
         <button id="fit">Ajustar vista</button>
       </div>
     </div>
   </div>
 </div>
+
+<div id="menu2" hidden >
+  <h3>Estadísticas de rutas</h3>
+  <div id="btns2">
+      <div id="stats" style="margin-top:16px;"></div>
+      <div id="details" style="margin-top:16px;"></div>
+      <div id="utils" style="margin-top:16px;">  
+  </div>
+</div>
+
+
+
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
   <script src="mapa.js">  </script>
 </body>
